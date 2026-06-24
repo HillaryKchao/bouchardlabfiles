@@ -1,0 +1,32 @@
+/*
+STUB replacing the original synapses.hoc.
+
+WHY: The original synapses_0fb1ca4724 template (preserved alongside this
+file as synapses_full_original.hoc.bak) instantiates ProbAMPANMDA_EMS and
+ProbGABAAB_EMS point processes. Those two mod files use a legacy
+verbatim-RNG API that doesn't compile against this NEURON build (see
+mechanisms_skipped/ for the originals + the compile error). We don't need
+BBP's own anatomical connectivity loader anyway -- our pipeline drives its
+own AMPA (Exp2Syn) + NMDA_Mg (custom, Mg-blocked) + GABA-A (Exp2Syn)
+synapses directly via generate_input_spike_trains_for_simulation() and
+add_synapses_multicompartment(), independent of this class.
+
+This stub only needs to satisfy two things:
+  1. template.hoc's `objref synapses` / `proc load_synapses()` parse
+     correctly (HOC resolves "new ClassName()" eagerly while parsing a
+     proc body, even one that's never called).
+  2. If synapses_enabled=1 were ever passed to the cell constructor,
+     load_synapses() would be called -- it's a no-op here, so that path is
+     intentionally inert rather than instantiating BBP's connectivity.
+
+If you want the *real* BBP probabilistic AMPA/NMDA/GABA synapses with
+short-term plasticity later, restore synapses_full_original.hoc.bak here
+and patch the two RNG mod files for the new NEURON API.
+*/
+begintemplate synapses_0fb1ca4724
+public load_synapses
+proc init() {
+}
+proc load_synapses() {
+}
+endtemplate synapses_0fb1ca4724
