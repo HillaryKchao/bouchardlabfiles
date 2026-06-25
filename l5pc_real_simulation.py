@@ -2,27 +2,26 @@
 l5pc_real_simulation.py
 ========================
 
-SETUP NOTES (what was changed in the BBP package to make this run)
+SETUP NOTES
 --------------------------------------------------------------------
-The l5pc_model/ folder distributed with this script is a CLEANED version of
-the BBP "L5_TTPC1_cADpyr232_1" package. Three things were removed/patched
-relative to the original download:
+l5pc_model/ folder is a CLEANED version of the BBP "L5_TTPC1_cADpyr232_1" 
+package. Three things were removed/patched relative to the original download:
   1. mechanisms/ProbAMPANMDA_EMS.mod and ProbGABAAB_EMS.mod were moved to
      mechanisms_skipped/ -- they use nrn_random_arg()/scop_random() with a
      legacy signature that fails to compile on this NEURON version (a
-     NEURON 9.x C++ API change). Not needed since we use our own synapses.
+     NEURON 9.x C++ API change). Not needed because I use my own synapses.
   2. mechanisms/vecevent.mod and vecstim.mod were moved to
      mechanisms_skipped/ -- both define a mechanism named "VecStim",
-     which collide if compiled together. Not needed: this pipeline
+     which collide if compiled together. Not needed since this pipeline
      delivers spikes via NetCon(None, syn).event(), not VecStim.
   3. synapses/synapses.hoc was replaced with a stub (the original is saved
      alongside as synapses_full_original.hoc.bak). The real one
      instantiates ProbAMPANMDA_EMS/ProbGABAAB_EMS, and NEURON resolves
-     "new Mechanism(location)" eagerly while parsing -- even inside a proc
-     that's never called -- so the file fails to load at all without those
+     "new Mechanism(location)" eagerly while parsing (even inside a proc
+     that's never called!) so the file fails to load at all without those
      two mechanisms compiled. The stub satisfies the parser without
-     pulling in BBP's anatomical connectivity loader (which we don't use
-     anyway -- we pass synapses_enabled=0 to the cell constructor).
+     pulling in BBP's anatomical connectivity loader (which isn't used anyways, 
+     as synapses_enabled=0 is passed to the cell constructor).
 """
 
 import os
@@ -77,7 +76,7 @@ GABAA_WEIGHT_US = 0.010
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# STEP 0 — compile mechanisms (skip if already compiled) and import NEURON
+# STEP 0 — compile mechanisms and import NEURON
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _get_arch_dir(mech_dir):
