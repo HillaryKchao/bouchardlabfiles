@@ -2,12 +2,10 @@
 l5pc_real_simulation.py
 ========================
 
-SETUP NOTES
---------------------------------------------------------------------
-l5pc_model/ folder is a CLEANED version of the BBP "L5_TTPC1_cADpyr232_1" 
-package. Three things were removed/patched relative to the original download:
+Note that l5pc_model/ is a CLEANED version of BBP "L5_TTPC1_cADpyr232_1" 
+package. Here are the changes:
   1. mechanisms/ProbAMPANMDA_EMS.mod and ProbGABAAB_EMS.mod were moved to
-     mechanisms_skipped/ -- they use nrn_random_arg()/scop_random() with a
+     mechanisms_skipped/. They use nrn_random_arg()/scop_random() with a
      legacy signature that fails to compile on this NEURON version (a
      NEURON 9.x C++ API change). Not needed because I use my own synapses.
   2. mechanisms/vecevent.mod and vecstim.mod were moved to
