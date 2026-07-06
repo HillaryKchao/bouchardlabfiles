@@ -16,6 +16,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import l5pc_real_simulation as m   # noqa: E402  (must come after path setup)
+from segev_inputs import generate_input_spike_trains
 
 def is_nmda_synapse(syn):
     """Return True for the NMDA synapse objects created by the real model."""
@@ -30,7 +31,7 @@ def main(random_seed=7):
 
     print("[2] Generating the SAME spike trains as the original run "
           f"(random_seed={random_seed})...")
-    ex_bin, inh_bin = m.generate_input_spike_trains_for_simulation(
+    ex_bin, inh_bin = generate_input_spike_trains(
         sim_duration_ms=m.SIM_DURATION_MS, seg_length_um=seg_length_um,
         min_seg_length_um=m.MIN_SEG_LENGTH_UM,
         num_ex_spikes_per_100ms_range=m.NUM_EX_SPIKES_PER_100MS_RANGE,
@@ -74,7 +75,7 @@ def main(random_seed=7):
           f"({100 * above.mean():.1f}%)")
     print(f"    Apical V min/max: {apical_v_arr.min():.1f} / {apical_v_arr.max():.1f} mV")
     print(f"    Somatic APs: {len(spk_t_arr)} "
-          f"(vs. 54 in the original NMDA-on run)")
+          f"(compare against l5pc_real_simulation_data.npz's NMDA-on run)")
 
     np.savez_compressed(
         'l5pc_nmda_off_data.npz',

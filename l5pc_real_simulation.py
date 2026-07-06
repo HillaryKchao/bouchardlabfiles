@@ -26,8 +26,9 @@ import os
 import subprocess
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import signal
 from scipy.ndimage import gaussian_filter1d
+
+from segev_inputs import generate_input_spike_trains, check_per_input_rates, DEFAULT_SYNAPSE_KINETICS
 
 # ─────────────────────────────────────────────────────────────────────────────
 # PATHS
@@ -37,11 +38,20 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR  = os.path.join(SCRIPT_DIR, "l5pc_model")
 MECH_DIR   = os.path.join(MODEL_DIR, "mechanisms")
 
+# use BBP probabilistic release mechanisms
+USE_PROBABILISTIC_SYNAPSES = True
+
+# BBP-typical short-term plasticity parameters (exc/inh)
+PROB_SYN_PARAMS = {
+    "AMPANMDA": {"Use": 0.5, "Dep": 671.0, "Fac": 17.0, "gmax_uS": 0.007, "NMDA_ratio": 0.71},
+    "GABAAB":   {"Use": 0.25, "Dep": 706.0, "Fac": 21.0, "gmax_uS": 0.002},
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # SIMULATION PARAMETERS
 # ─────────────────────────────────────────────────────────────────────────────
 
-SIM_DURATION_MS = 2000
+SIM_DURATION_MS = 4000
 DT_MS           = 0.025
 
 # documented BBP operating temperature for this exact cell (constants.hoc)
@@ -60,11 +70,7 @@ TEMPORAL_SMOOTHING_SIGMA_OPTIONS_MS = [25, 30, 35, 40, 50, 60, 80,
                                         100, 150, 200, 300, 400, 500, 600]
 TEMPORAL_SMOOTHING_SIGMA_JITTER     = 20
 
-SYNAPSE_PARAMS = {
-    "AMPA":   {"tau_rise_ms": 0.2, "tau_decay_ms": 2.0,  "E_rev_mV": 0.0},
-    "NMDA":   {"tau_rise_ms": 1.0, "tau_decay_ms": 50.0, "E_rev_mV": 0.0, "mg_mM": 1.0},
-    "GABA_A": {"tau_rise_ms": 0.5, "tau_decay_ms": 8.0,  "E_rev_mV": -75.0},
-}
+SYNAPSE_PARAMS = DEFAULT_SYNAPSE_KINETICS
 
 # check check_per_synapse_rates() output and the resulting firing rate
 # raise/lower if the cell is silent or saturating
@@ -115,6 +121,8 @@ neuron.load_mechanisms(MECH_DIR)
 if not hasattr(h, "NMDA_Mg"):
     raise RuntimeError("NMDA_Mg mechanism not found after load_mechanisms(). "
                         "Delete l5pc_model/mechanisms/x86_64 (or arm64) and rerun.")
+
+from presynaptic_spike_train import PresynapticSpikeTrain  # noqa: E402
 
 # template.hoc / morphology.hoc / synapses/synapses.hoc all use paths
 # relative to MODEL_DIR (e.g. load_file("morphology/....asc")), so NEURON
@@ -167,98 +175,67 @@ def collect_all_segments(cell, include_soma=True):
           f"total tree length: {seg_lengths.sum():.1f} um")
     return all_segs, seg_lengths
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-# SPIKE TRAIN GENERATION
-# ─────────────────────────────────────────────────────────────────────────────
-
-def generate_input_spike_trains_for_simulation(
-    sim_duration_ms, seg_length_um, min_seg_length_um,
-    num_ex_spikes_per_100ms_range, num_ex_inh_spike_diff_per_100ms_range,
-    inst_rate_interval_options_ms, temporal_smoothing_sigma_options_ms,
-    inst_rate_interval_jitter=20, temporal_smoothing_jitter=20, random_seed=None,
-):
-    if random_seed is not None:
-        np.random.seed(random_seed)
-
-    num_segments = len(seg_length_um)
-    adjusted_length_um = min_seg_length_um + seg_length_um
-    total_tree_length_um = adjusted_length_um.sum()
-
-    keep_rate_const_ms = inst_rate_interval_options_ms[
-        np.random.randint(len(inst_rate_interval_options_ms))]
-    keep_rate_const_ms += int(2 * inst_rate_interval_jitter * np.random.rand()
-                               - inst_rate_interval_jitter)
-    keep_rate_const_ms = max(keep_rate_const_ms, 1)
-
-    sigma_cap_ms = sim_duration_ms // 3
-    smoothing_sigma_ms = temporal_smoothing_sigma_options_ms[
-        np.random.randint(len(temporal_smoothing_sigma_options_ms))]
-    smoothing_sigma_ms += int(2 * temporal_smoothing_jitter * np.random.rand()
-                               - temporal_smoothing_jitter)
-    smoothing_sigma_ms = max(1, min(smoothing_sigma_ms, sigma_cap_ms))
-
-    num_epochs = int(np.ceil(sim_duration_ms / keep_rate_const_ms))
-    num_ex_per_100ms = np.random.uniform(
-        low=num_ex_spikes_per_100ms_range[0], high=num_ex_spikes_per_100ms_range[1],
-        size=(1, num_epochs))
-    num_inh_low = np.maximum(0, num_ex_per_100ms + num_ex_inh_spike_diff_per_100ms_range[0])
-    num_inh_high = num_ex_per_100ms + num_ex_inh_spike_diff_per_100ms_range[1]
-    num_inh_per_100ms = np.random.uniform(low=num_inh_low, high=num_inh_high,
-                                           size=(1, num_epochs))
-
-    ex_rate_per_um_per_ms = num_ex_per_100ms / (total_tree_length_um * 100.0)
-    inh_rate_per_um_per_ms = num_inh_per_100ms / (total_tree_length_um * 100.0)
-
-    ex_rate_per_seg = np.kron(ex_rate_per_um_per_ms, np.ones((num_segments, 1)))
-    inh_rate_per_seg = np.kron(inh_rate_per_um_per_ms, np.ones((num_segments, 1)))
-    ex_rate_per_seg *= np.tile(adjusted_length_um[:, np.newaxis], [1, ex_rate_per_seg.shape[1]])
-    inh_rate_per_seg *= np.tile(adjusted_length_um[:, np.newaxis], [1, inh_rate_per_seg.shape[1]])
-    ex_rate_per_seg *= np.random.uniform(0.5, 1.5, size=ex_rate_per_seg.shape)
-    inh_rate_per_seg *= np.random.uniform(0.5, 1.5, size=inh_rate_per_seg.shape)
-
-    ex_rate_per_seg = np.kron(ex_rate_per_seg, np.ones((1, keep_rate_const_ms)))[:, :sim_duration_ms]
-    inh_rate_per_seg = np.kron(inh_rate_per_seg, np.ones((1, keep_rate_const_ms)))[:, :sim_duration_ms]
-
-    win_len = 1 + 7 * smoothing_sigma_ms
-    smoothing_window = signal.windows.gaussian(win_len, std=smoothing_sigma_ms)[np.newaxis, :]
-    smoothing_window /= smoothing_window.sum()
-
-    ex_rate_smoothed = np.clip(signal.convolve(ex_rate_per_seg, smoothing_window, mode='same'), 0, None)
-    inh_rate_smoothed = np.clip(signal.convolve(inh_rate_per_seg, smoothing_window, mode='same'), 0, None)
-
-    ex_inst_prob = np.random.exponential(scale=ex_rate_smoothed)
-    inh_inst_prob = np.random.exponential(scale=inh_rate_smoothed)
-    ex_spikes_bin = (np.random.rand(*ex_inst_prob.shape) < ex_inst_prob).astype(np.uint8)
-    inh_spikes_bin = (np.random.rand(*inh_inst_prob.shape) < inh_inst_prob).astype(np.uint8)
-    return ex_spikes_bin, inh_spikes_bin
-
-
-def check_per_synapse_rates(ex_spikes_bin, inh_spikes_bin, sim_duration_ms):
-    ex_rates = ex_spikes_bin.sum(axis=1) / (sim_duration_ms / 1000.0)
-    inh_rates = inh_spikes_bin.sum(axis=1) / (sim_duration_ms / 1000.0)
-    print(f"    Per-synapse exc rate: mean={ex_rates.mean():.1f} Hz, "
-          f"max={ex_rates.max():.1f} Hz, min={ex_rates.min():.1f} Hz")
-    print(f"    Per-synapse inh rate: mean={inh_rates.mean():.1f} Hz, "
-          f"max={inh_rates.max():.1f} Hz, min={inh_rates.min():.1f} Hz")
-    if ex_rates.max() > 300:
-        print("    WARNING: peak per-synapse rate > 300 Hz -- "
-              "consider reducing NUM_EX_SPIKES_PER_100MS_RANGE.")
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # SYNAPSE PLACEMENT
 # ─────────────────────────────────────────────────────────────────────────────
 
-class PresynapticSpikeTrain:
-    def __init__(self, spike_times_ms, netcon):
-        self.spike_times_ms = spike_times_ms
-        self.nc = netcon
-        self._fih = h.FInitializeHandler(self._schedule_events)
 
-    def _schedule_events(self):
-        for t in self.spike_times_ms:
-            self.nc.event(t)
+def add_synapses_multicompartment_probabilistic(all_segs, ex_spikes_bin, inh_spikes_bin,
+                                                 weight_scale=1.0, random_seed=0):
+    """
+    Same interface as add_synapses_multicompartment(), but using the real
+    BBP probabilistic-release synapses (ProbAMPANMDA_EMS for combined
+    AMPA+NMDA, ProbGABAAB_EMS for GABA-A+GABA-B) instead of Exp2Syn+NMDA_Mg.
+    Each synapse gets its own independent, reproducible Random123 stream in
+    negexp(1) mode, as required by the mod file's urand().
+    """
+    assert len(all_segs) == ex_spikes_bin.shape[0] == inh_spikes_bin.shape[0]
+    exc_p, inh_p = PROB_SYN_PARAMS["AMPANMDA"], PROB_SYN_PARAMS["GABAAB"]
+    synapses, spike_trains, netcons, rngs = [], [], [], []
+
+    # gmax is declared PARAMETER but not RANGE in these mod files, so it is a
+    # single GLOBAL value shared by every instance of the mechanism -- set it
+    # once here rather than per-synapse.
+    h.gmax_ProbAMPANMDA_EMS = exc_p["gmax_uS"] * weight_scale
+    h.gmax_ProbGABAAB_EMS = inh_p["gmax_uS"] * weight_scale
+
+    for seg_ind, (sec, seg, _name) in enumerate(all_segs):
+        loc = seg.x
+
+        exc_syn = h.ProbAMPANMDA_EMS(sec(loc))
+        exc_syn.Use, exc_syn.Dep, exc_syn.Fac = exc_p["Use"], exc_p["Dep"], exc_p["Fac"]
+        exc_syn.NMDA_ratio = exc_p["NMDA_ratio"]
+        exc_syn.synapseID = seg_ind
+        exc_rng = h.Random()
+        exc_rng.Random123(seg_ind * 2 + 1, random_seed, 0)
+        exc_rng.negexp(1)
+        exc_syn.setRNG(exc_rng)
+        rngs.append(exc_rng)
+        synapses.append(exc_syn)
+        exc_bins = np.where(ex_spikes_bin[seg_ind, :] == 1)[0]
+        exc_times_ms = np.maximum(exc_bins.astype(float) + 0.5, 0.1)
+        exc_nc = h.NetCon(None, exc_syn)
+        exc_nc.delay, exc_nc.weight[0] = 0.0, 1.0   # gmax already carries the magnitude
+        netcons.append(exc_nc)
+        spike_trains.append(PresynapticSpikeTrain(exc_times_ms, exc_nc))
+
+        inh_syn = h.ProbGABAAB_EMS(sec(loc))
+        inh_syn.Use, inh_syn.Dep, inh_syn.Fac = inh_p["Use"], inh_p["Dep"], inh_p["Fac"]
+        inh_syn.synapseID = seg_ind
+        inh_rng = h.Random()
+        inh_rng.Random123(seg_ind * 2 + 2, random_seed, 0)
+        inh_rng.negexp(1)
+        inh_syn.setRNG(inh_rng)
+        rngs.append(inh_rng)
+        synapses.append(inh_syn)
+        inh_bins = np.where(inh_spikes_bin[seg_ind, :] == 1)[0]
+        inh_times_ms = np.maximum(inh_bins.astype(float) + 0.5, 0.1)
+        inh_nc = h.NetCon(None, inh_syn)
+        inh_nc.delay, inh_nc.weight[0] = 0.0, 1.0
+        netcons.append(inh_nc)
+        spike_trains.append(PresynapticSpikeTrain(inh_times_ms, inh_nc))
+
+    return synapses, spike_trains, netcons, rngs
 
 
 def add_synapses_multicompartment(all_segs, ex_spikes_bin, inh_spikes_bin, weight_scale=1.0):
@@ -431,7 +408,7 @@ def plot_results(t_ms, soma_v, apical_v, basal_v, spike_times,
     ax.set_title('Somatic Membrane Potential (Real L5PC Model Output)', fontsize=10)
     ax.set_xlim(0, sim_dur); ax.set_ylim(-80, 50); ax.legend(fontsize=8)
 
-    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.tight_layout(rect=[0, 0, 1, 0.96]) # type: ignore
     out_path = 'l5pc_real_simulation_results.png'
     plt.savefig(out_path, dpi=150, bbox_inches='tight')
     print(f"    Figure saved: {out_path}")
@@ -459,7 +436,7 @@ def main(random_seed=None):
 
     print(f"\n[3] Generating Segev-style spike trains "
           f"({len(all_segs)} segments, {SIM_DURATION_MS} ms) ...")
-    ex_spikes_bin, inh_spikes_bin = generate_input_spike_trains_for_simulation(
+    ex_spikes_bin, inh_spikes_bin = generate_input_spike_trains(
         sim_duration_ms=SIM_DURATION_MS, seg_length_um=seg_length_um,
         min_seg_length_um=MIN_SEG_LENGTH_UM,
         num_ex_spikes_per_100ms_range=NUM_EX_SPIKES_PER_100MS_RANGE,
@@ -472,13 +449,21 @@ def main(random_seed=None):
     )
     print(f"    ex_spikes_bin: shape={ex_spikes_bin.shape}, total spikes={ex_spikes_bin.sum()}")
     print(f"    inh_spikes_bin: shape={inh_spikes_bin.shape}, total spikes={inh_spikes_bin.sum()}")
-    check_per_synapse_rates(ex_spikes_bin, inh_spikes_bin, SIM_DURATION_MS)
+    check_per_input_rates(ex_spikes_bin, inh_spikes_bin, SIM_DURATION_MS)
 
-    print("\n[4] Placing synapses (AMPA+NMDA_Mg + GABA-A per segment) ...")
-    synapses, spike_trains, netcons = add_synapses_multicompartment(
-        all_segs, ex_spikes_bin, inh_spikes_bin, weight_scale=1.0)
-    print(f"    {len(synapses)} total synapse objects "
-          f"({len(all_segs)} AMPA + {len(all_segs)} NMDA + {len(all_segs)} GABA-A)")
+    if USE_PROBABILISTIC_SYNAPSES:
+        print("\n[4] Placing synapses (probabilistic ProbAMPANMDA_EMS + ProbGABAAB_EMS per segment) ...")
+        synapses, spike_trains, netcons, rngs = add_synapses_multicompartment_probabilistic(
+            all_segs, ex_spikes_bin, inh_spikes_bin, weight_scale=1.0,
+            random_seed=random_seed if random_seed is not None else 0)
+        print(f"    {len(synapses)} total synapse objects "
+              f"({len(all_segs)} ProbAMPANMDA_EMS + {len(all_segs)} ProbGABAAB_EMS)")
+    else:
+        print("\n[4] Placing synapses (AMPA+NMDA_Mg + GABA-A per segment) ...")
+        synapses, spike_trains, netcons = add_synapses_multicompartment(
+            all_segs, ex_spikes_bin, inh_spikes_bin, weight_scale=1.0)
+        print(f"    {len(synapses)} total synapse objects "
+              f"({len(all_segs)} AMPA + {len(all_segs)} NMDA + {len(all_segs)} GABA-A)")
 
     print("\n[5] Setting up recording (soma + apical + basal) ...")
     t_vec, soma_v, apical_v, basal_v, spike_vec, apc = setup_recording(cell)

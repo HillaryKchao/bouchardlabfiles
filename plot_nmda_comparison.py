@@ -15,6 +15,9 @@ t = d_on['t_ms']
 api_on, api_off = d_on['apical_v_mv'], d_off['apical_v_mv']
 soma_on, soma_off = d_on['soma_v_mv'], d_off['soma_v_mv']
 
+n_aps_on = len(d_on['somatic_spike_times']) if 'somatic_spike_times' in d_on else 0
+n_aps_off = len(d_off['somatic_spike_times']) if 'somatic_spike_times' in d_off else 0
+
 fig, axes = plt.subplots(2, 1, figsize=(15, 8), sharex=True)
 
 ax = axes[0]
@@ -22,13 +25,13 @@ ax.plot(t, api_on, color='#FF9800', lw=0.8, label='NMDA ON (original)')
 ax.plot(t, api_off, color='#555555', lw=0.8, alpha=0.8, label='NMDA OFF (weight=0)')
 ax.axhline(-40, color='k', lw=0.7, linestyle=':', label='-40 mV reference line')
 ax.set_ylabel('Apical Vm (mV)')
-ax.set_title('Apical Dendrite (391 um from soma): NMDA on vs NMDA off, same input, same seed', fontsize=11)
+ax.set_title('Apical Dendrite (mid-tree): NMDA on vs NMDA off, same input, same seed', fontsize=11)
 ax.set_ylim(-80, 50)
 ax.legend(fontsize=9, loc='upper right')
 
 ax = axes[1]
-ax.plot(t, soma_on, color='k', lw=0.8, label='Soma, NMDA ON (54 APs)')
-ax.plot(t, soma_off, color='#2196F3', lw=0.8, alpha=0.8, label='Soma, NMDA OFF (1 AP)')
+ax.plot(t, soma_on, color='k', lw=0.8, label=f'Soma, NMDA ON ({n_aps_on} APs)')
+ax.plot(t, soma_off, color='#2196F3', lw=0.8, alpha=0.8, label=f'Soma, NMDA OFF ({n_aps_off} APs)')
 ax.set_xlabel('Time (ms)'); ax.set_ylabel('Soma Vm (mV)')
 ax.set_title('Somatic output: NMDA on vs NMDA off', fontsize=11)
 ax.set_ylim(-80, 50)

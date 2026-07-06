@@ -15,6 +15,7 @@ OUTPUT (Y):  somatic output spike train, binary, 1 ms bins (same dt as X).
 """
 
 import numpy as np
+from segev_inputs import generate_input_spike_trains, check_per_input_rates
 import l5pc_real_simulation as sim
 
 def bin_output_spikes(spike_times_ms, sim_duration_ms):
@@ -42,7 +43,7 @@ def build_miso_dataset(random_seed=7, out_path="l5pc_miso_dataset.npz"):
     region_names = np.array([name for (_sec, _seg, name) in all_segs])
 
     print("[3] Generating input spike trains (the MISO input X) ...")
-    ex_spikes_bin, inh_spikes_bin = sim.generate_input_spike_trains_for_simulation(
+    ex_spikes_bin, inh_spikes_bin = generate_input_spike_trains(
         sim_duration_ms=sim.SIM_DURATION_MS,
         seg_length_um=seg_length_um,
         min_seg_length_um=sim.MIN_SEG_LENGTH_UM,
@@ -54,11 +55,10 @@ def build_miso_dataset(random_seed=7, out_path="l5pc_miso_dataset.npz"):
         temporal_smoothing_jitter=sim.TEMPORAL_SMOOTHING_SIGMA_JITTER,
         random_seed=random_seed,
     )
-    sim.check_per_synapse_rates(ex_spikes_bin, inh_spikes_bin, sim.SIM_DURATION_MS)
+    check_per_input_rates(ex_spikes_bin, inh_spikes_bin, sim.SIM_DURATION_MS)
 
     print("[4] Placing synapses on the cell ...")
-    synapses, spike_trains, netcons = sim.add_synapses_multicompartment(
-        all_segs, ex_spikes_bin, inh_spikes_bin, weight_scale=1.0)
+    sim.add_synapses_multicompartment(all_segs, ex_spikes_bin, inh_spikes_bin, weight_scale=1.0)
 
     print("[5] Setting up recording ...")
     t_vec, soma_v, apical_v, basal_v, spike_vec, apc = sim.setup_recording(cell)
