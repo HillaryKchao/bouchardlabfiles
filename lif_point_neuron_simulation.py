@@ -8,6 +8,7 @@ models.
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.ndimage import gaussian_filter1d
 from segev_inputs import check_per_input_rates, build_population_inputs
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -104,8 +105,8 @@ def run_lif(ex_bin_1ms, inh_bin_1ms):
 
 
 def plot_results(t_ms, v, spike_times, ex_bin_1ms, inh_bin_1ms, ex_count, inh_count):
-    fig, axes = plt.subplots(4, 1, figsize=(14, 12),
-                              gridspec_kw={'height_ratios': [2, 1, 1, 2]})
+    fig, axes = plt.subplots(5, 1, figsize=(14, 12),
+                              gridspec_kw={'height_ratios': [2, 1, 1, 2, 2]})
     fig.suptitle(f'LIF Point Neuron -- {NUM_EXC_INPUTS} exc + {NUM_INH_INPUTS} inh Segev-style inputs',
                   fontsize=12)
 
@@ -133,8 +134,19 @@ def plot_results(t_ms, v, spike_times, ex_bin_1ms, inh_bin_1ms, ex_count, inh_co
     ax.set_ylabel('Rate proxy'); ax.legend(fontsize=8); ax.set_xlim(0, SIM_DURATION_MS)
     ax.set_xlabel('Time (ms)')
     ax.set_title('Inhibitory Population Drive', fontsize=10)
-
+    
     ax = axes[3]
+    exc_mean = ex_bin_1ms.mean(axis=0).astype(float)
+    inh_mean = inh_bin_1ms.mean(axis=0).astype(float)
+    ax.plot(gaussian_filter1d(exc_mean - inh_mean, 50) * 1000, '#9E9E9E', lw=1,
+            label='Exc mean rate - Inh mean rate (Hz)')
+    ax.axhline(y=0, linestyle=':')
+    ax.set_ylabel('Rate (Hz)')
+    ax.legend(fontsize=8)
+    ax.set_xlim(0, SIM_DURATION_MS)
+    ax.set_title('Mean Instantaneous Input Rate', fontsize=10)
+
+    ax = axes[4]
     ax.plot(t_ms, v, 'k', lw=0.6, label='V_m')
     if len(spike_times) > 0:
         ax.plot(spike_times, np.full_like(spike_times, V_TH_MV + 10), 'r|', markersize=10,

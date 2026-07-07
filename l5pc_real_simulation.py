@@ -380,8 +380,10 @@ def plot_results(t_ms, soma_v, apical_v, basal_v, spike_times,
     ax = axes[2]
     exc_mean = ex_spikes_bin.mean(axis=0).astype(float)
     inh_mean = inh_spikes_bin.mean(axis=0).astype(float)
-    ax.plot(t_bins, gaussian_filter1d(exc_mean, 50) * 1000, '#2196F3', lw=1.5, label='Exc mean inst. rate (Hz)')
-    ax.plot(t_bins, gaussian_filter1d(inh_mean, 50) * 1000, '#F44336', lw=1.5, label='Inh mean inst. rate (Hz)')
+    # ax.plot(t_bins, gaussian_filter1d(exc_mean, 50) * 1000, '#2196F3', lw=1.5, label='Exc mean inst. rate (Hz)')
+    # ax.plot(t_bins, gaussian_filter1d(inh_mean, 50) * 1000, '#F44336', lw=1.5, label='Inh mean inst. rate (Hz)')
+    ax.plot(gaussian_filter1d(exc_mean - inh_mean, 50) * 1000, '#9E9E9E', lw=1, label='Exc mean rate - Inh mean rate (Hz)')
+    ax.axhline(y=0, linestyle=':')
     ax.set_ylabel('Inst. rate (Hz)'); ax.set_xlim(0, sim_dur)
     ax.set_title('Mean Instantaneous Firing Rate Across All Segments', fontsize=10)
     ax.legend(fontsize=8); ax.set_xlabel('Time (ms)')
@@ -392,14 +394,14 @@ def plot_results(t_ms, soma_v, apical_v, basal_v, spike_times,
     ax.set_title('Basal Dendrite Membrane Potential', fontsize=10)
     ax.set_xlim(0, sim_dur); ax.set_ylim(-80, 50); ax.legend(fontsize=8)
 
-    ax = axes[4]
-    ax.plot(t_ms_arr, api_v_arr, color='#FF9800', lw=0.8, label='Apical dendrite (mid-tree)')
-    ax.axhline(-40, color='k', lw=0.5, linestyle=':', label='NMDA spike threshold ≈ −40 mV')
-    ax.set_xlabel('Time (ms)'); ax.set_ylabel('Vm (mV)')
-    ax.set_title('Apical Dendrite Vm — look for fast NMDA spike events', fontsize=10)
-    ax.set_xlim(0, sim_dur); ax.set_ylim(-80, 50); ax.legend(fontsize=8)
+    # ax = axes[4]
+    # ax.plot(t_ms_arr, api_v_arr, color='#FF9800', lw=0.8, label='Apical dendrite (mid-tree)')
+    # ax.axhline(-40, color='k', lw=0.5, linestyle=':', label='NMDA spike threshold ≈ −40 mV')
+    # ax.set_xlabel('Time (ms)'); ax.set_ylabel('Vm (mV)')
+    # ax.set_title('Apical Dendrite Vm — look for fast NMDA spike events', fontsize=10)
+    # ax.set_xlim(0, sim_dur); ax.set_ylim(-80, 50); ax.legend(fontsize=8)
 
-    ax = axes[5]
+    ax = axes[4]
     ax.plot(t_ms_arr, soma_v_arr, 'k', lw=0.8, label='V_soma')
     if len(spikes) > 0:
         ax.plot(spikes, np.full_like(spikes, 40), 'r|', markersize=10, label=f'{len(spikes)} APs')

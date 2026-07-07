@@ -1,104 +1,120 @@
-./Ca_HVA.c: .././Ca_HVA.mod
+Ca_HVA.cpp: .././Ca_HVA.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "Ca_HVA.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "Ca_HVA.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./Ca_HVA.o: ./Ca_HVA.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./Ca_HVA.o: Ca_HVA.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./Ca_LVAst.c: .././Ca_LVAst.mod
+Ca_LVAst.cpp: .././Ca_LVAst.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "Ca_LVAst.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "Ca_LVAst.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./Ca_LVAst.o: ./Ca_LVAst.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./Ca_LVAst.o: Ca_LVAst.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./CaDynamics_E2.c: .././CaDynamics_E2.mod
+CaDynamics_E2.cpp: .././CaDynamics_E2.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "CaDynamics_E2.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "CaDynamics_E2.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./CaDynamics_E2.o: ./CaDynamics_E2.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./CaDynamics_E2.o: CaDynamics_E2.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./Ih.c: .././Ih.mod
+Ih.cpp: .././Ih.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "Ih.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "Ih.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./Ih.o: ./Ih.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./Ih.o: Ih.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./Im.c: .././Im.mod
+Im.cpp: .././Im.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "Im.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "Im.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./Im.o: ./Im.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./Im.o: Im.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./K_Pst.c: .././K_Pst.mod
+K_Pst.cpp: .././K_Pst.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "K_Pst.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "K_Pst.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./K_Pst.o: ./K_Pst.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./K_Pst.o: K_Pst.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./K_Tst.c: .././K_Tst.mod
+K_Tst.cpp: .././K_Tst.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "K_Tst.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "K_Tst.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./K_Tst.o: ./K_Tst.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./K_Tst.o: K_Tst.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./Nap_Et2.c: .././Nap_Et2.mod
+Nap_Et2.cpp: .././Nap_Et2.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "Nap_Et2.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "Nap_Et2.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./Nap_Et2.o: ./Nap_Et2.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./Nap_Et2.o: Nap_Et2.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./NaTa_t.c: .././NaTa_t.mod
+NaTa_t.cpp: .././NaTa_t.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "NaTa_t.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "NaTa_t.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./NaTa_t.o: ./NaTa_t.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./NaTa_t.o: NaTa_t.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./NaTs2_t.c: .././NaTs2_t.mod
+NaTs2_t.cpp: .././NaTs2_t.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "NaTs2_t.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "NaTs2_t.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./NaTs2_t.o: ./NaTs2_t.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./NaTs2_t.o: NaTs2_t.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./NMDA_Mg.c: .././NMDA_Mg.mod
+NMDA_Mg.cpp: .././NMDA_Mg.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "NMDA_Mg.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "NMDA_Mg.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./NMDA_Mg.o: ./NMDA_Mg.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./NMDA_Mg.o: NMDA_Mg.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./SK_E2.c: .././SK_E2.mod
+ProbAMPANMDA_EMS.cpp: .././ProbAMPANMDA_EMS.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "SK_E2.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "ProbAMPANMDA_EMS.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./SK_E2.o: ./SK_E2.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./ProbAMPANMDA_EMS.o: ProbAMPANMDA_EMS.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 
-./SKv3_1.c: .././SKv3_1.mod
+ProbGABAAB_EMS.cpp: .././ProbGABAAB_EMS.mod $(NOCMODL)
 	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
-	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "SKv3_1.mod" -o "/Users/hillary/dev/lbl/l5pc_model/mechanisms/arm64")
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "ProbGABAAB_EMS.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
 
-./SKv3_1.o: ./SKv3_1.c
-	@printf " -> $(C_GREEN)Compiling$(C_RESET) $<\\n"
-	$(COMPILE) -I"../." $(INCLUDES) -fPIC -c $< -o $@
+./ProbGABAAB_EMS.o: ProbGABAAB_EMS.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
+
+SK_E2.cpp: .././SK_E2.mod $(NOCMODL)
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "SK_E2.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
+
+./SK_E2.o: SK_E2.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
+
+SKv3_1.cpp: .././SKv3_1.mod $(NOCMODL)
+	@printf " -> $(C_GREEN)NMODL$(C_RESET) $<\\n"
+	(cd "../.";  MODLUNIT=$(NRNUNITS) $(NOCMODL) "SKv3_1.mod"  -o "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64" )
+
+./SKv3_1.o: SKv3_1.cpp
+	@printf " -> $(C_GREEN)Compiling$(C_RESET) /Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<\\n"
+	$(CXXCOMPILE) -I"../." $(INCLUDES) -fPIC -c "/Users/hillary/dev/bouchardlabfiles/l5pc_model/mechanisms/arm64/$<" -o $@
 

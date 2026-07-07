@@ -2,25 +2,24 @@
 #include "hocdec.h"
 extern int nrnmpi_myid;
 extern int nrn_nobanner_;
-#if defined(__cplusplus)
-extern "C" {
-#endif
 
-extern void _Ca_HVA_reg(void);
-extern void _Ca_LVAst_reg(void);
-extern void _CaDynamics_E2_reg(void);
-extern void _Ih_reg(void);
-extern void _Im_reg(void);
-extern void _K_Pst_reg(void);
-extern void _K_Tst_reg(void);
-extern void _Nap_Et2_reg(void);
-extern void _NaTa_t_reg(void);
-extern void _NaTs2_t_reg(void);
-extern void _NMDA_Mg_reg(void);
-extern void _SK_E2_reg(void);
-extern void _SKv3_1_reg(void);
+extern "C" void _Ca_HVA_reg(void);
+extern "C" void _Ca_LVAst_reg(void);
+extern "C" void _CaDynamics_E2_reg(void);
+extern "C" void _Ih_reg(void);
+extern "C" void _Im_reg(void);
+extern "C" void _K_Pst_reg(void);
+extern "C" void _K_Tst_reg(void);
+extern "C" void _Nap_Et2_reg(void);
+extern "C" void _NaTa_t_reg(void);
+extern "C" void _NaTs2_t_reg(void);
+extern "C" void _NMDA_Mg_reg(void);
+extern "C" void _ProbAMPANMDA_EMS_reg(void);
+extern "C" void _ProbGABAAB_EMS_reg(void);
+extern "C" void _SK_E2_reg(void);
+extern "C" void _SKv3_1_reg(void);
 
-void modl_reg() {
+extern "C" void modl_reg() {
   if (!nrn_nobanner_) if (nrnmpi_myid < 1) {
     fprintf(stderr, "Additional mechanisms from files\n");
     fprintf(stderr, " \"./Ca_HVA.mod\"");
@@ -34,6 +33,8 @@ void modl_reg() {
     fprintf(stderr, " \"./NaTa_t.mod\"");
     fprintf(stderr, " \"./NaTs2_t.mod\"");
     fprintf(stderr, " \"./NMDA_Mg.mod\"");
+    fprintf(stderr, " \"./ProbAMPANMDA_EMS.mod\"");
+    fprintf(stderr, " \"./ProbGABAAB_EMS.mod\"");
     fprintf(stderr, " \"./SK_E2.mod\"");
     fprintf(stderr, " \"./SKv3_1.mod\"");
     fprintf(stderr, "\n");
@@ -49,10 +50,8 @@ void modl_reg() {
   _NaTa_t_reg();
   _NaTs2_t_reg();
   _NMDA_Mg_reg();
+  _ProbAMPANMDA_EMS_reg();
+  _ProbGABAAB_EMS_reg();
   _SK_E2_reg();
   _SKv3_1_reg();
 }
-
-#if defined(__cplusplus)
-}
-#endif
