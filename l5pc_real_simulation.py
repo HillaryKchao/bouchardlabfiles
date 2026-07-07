@@ -334,8 +334,8 @@ def plot_results(t_ms, soma_v, apical_v, basal_v, spike_times,
     sim_dur = ex_spikes_bin.shape[1]
     n_segs = ex_spikes_bin.shape[0]
 
-    fig, axes = plt.subplots(6, 1, figsize=(16, 22),
-                              gridspec_kw={'height_ratios': [2, 1.5, 1, 1.5, 1, 2]})
+    fig, axes = plt.subplots(5, 1, figsize=(16, 22),
+                              gridspec_kw={'height_ratios': [2, 1.5, 1, 1.5, 1]})
     fig.suptitle(
         'Multi-Compartment HH Neuron — Real L5PC (Hay et al. 2011 / BBP cADpyr232_L5_TTPC1)\n'
         f'({n_segs} synapse-bearing segments across {n_sections} sections, '
