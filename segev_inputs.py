@@ -50,16 +50,24 @@ def generate_input_spike_trains(
     num_ex_spikes_per_100ms_range, num_ex_inh_spike_diff_per_100ms_range,
     inst_rate_interval_options_ms, temporal_smoothing_sigma_options_ms,
     inst_rate_interval_jitter=20, temporal_smoothing_jitter=20, random_seed=None,
+    total_tree_length_um_override=None,
 ):
     """
     Returns (ex_spikes_bin, inh_spikes_bin), each shape (num_inputs, sim_duration_ms).
+
+    Added 'total_tree_length_um_override' so that two separate calls 
+    (one for an exc pool, one for an inh pool of a different size) 
+    share the same denominator and aren't biased relative to each other 
+    purely by population size. See 'build_population_inputs()'.
     """
     if random_seed is not None:
         np.random.seed(random_seed)
 
     num_segments = len(seg_length_um)
     adjusted_length_um = min_seg_length_um + seg_length_um
-    total_tree_length_um = adjusted_length_um.sum()
+    total_tree_length_um = (total_tree_length_um_override
+                             if total_tree_length_um_override is not None
+                             else adjusted_length_um.sum())
 
     keep_rate_const_ms = inst_rate_interval_options_ms[
         np.random.randint(len(inst_rate_interval_options_ms))]
@@ -134,7 +142,19 @@ def build_population_inputs(
     call sized for the excitatory pool, one (with an offset seed) sized for
     the inhibitory pool. Shared by the LIF and HH point-neuron models, which
     were previously carrying identical copies of this logic.
+
+    The exc and inh calls share one combined 'total_tree_length_um_override'
+    (based on num_exc_inputs + num_inh_inputs together) rather than each
+    normalizing by its own pool size. Without this, an asymmetric split (e.g.
+    500 exc vs. 125 inh) inflates the smaller pool's per-input rate purely
+    because it's dividing by a smaller total -- a structural bias, not a
+    reflection of num_ex_spikes_per_100ms_range vs. the inh diff range. With a
+    shared denominator, the exc/inh balance reflects only the sampled rate
+    epochs, matching how the multicompartment model (a single call, one
+    shared seg_length_um array) behaves.
     """
+    shared_total_length_um = (min_seg_length_um + 1.0) * (num_exc_inputs + num_inh_inputs)
+
     ex_bin, _ = generate_input_spike_trains(
         sim_duration_ms=sim_duration_ms, seg_length_um=np.ones(num_exc_inputs),
         min_seg_length_um=min_seg_length_um,
@@ -145,6 +165,7 @@ def build_population_inputs(
         inst_rate_interval_jitter=inst_rate_interval_jitter,
         temporal_smoothing_jitter=temporal_smoothing_jitter,
         random_seed=random_seed,
+        total_tree_length_um_override=shared_total_length_um,
     )
     _, inh_bin = generate_input_spike_trains(
         sim_duration_ms=sim_duration_ms, seg_length_um=np.ones(num_inh_inputs),
@@ -156,6 +177,7 @@ def build_population_inputs(
         inst_rate_interval_jitter=inst_rate_interval_jitter,
         temporal_smoothing_jitter=temporal_smoothing_jitter,
         random_seed=None if random_seed is None else random_seed + 1,
+        total_tree_length_um_override=shared_total_length_um,
     )
     return ex_bin, inh_bin
 

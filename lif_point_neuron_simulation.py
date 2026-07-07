@@ -34,8 +34,8 @@ E_INH_MV  = -75.0
 # synaptic kinetics (single-exponential conductance, per-input peak in uS)
 TAU_EXC_MS = 2.0
 TAU_INH_MS = 8.0
-W_EXC_US = 0.0031     # tuned so all three models land near ~4 Hz output
-W_INH_US = 0.0032
+W_EXC_US = 0.0025
+W_INH_US = 0.010
 
 # Segev input-statistics knobs (identical framework to the multicompartment model)
 MIN_SEG_LENGTH_UM = 10.0
@@ -106,7 +106,7 @@ def run_lif(ex_bin_1ms, inh_bin_1ms):
 
 def plot_results(t_ms, v, spike_times, ex_bin_1ms, inh_bin_1ms, ex_count, inh_count):
     fig, axes = plt.subplots(5, 1, figsize=(14, 12),
-                              gridspec_kw={'height_ratios': [2, 1, 1, 2, 2]})
+                              gridspec_kw={'height_ratios': [2, 1, 1, 2, 2.5]})
     fig.suptitle(f'LIF Point Neuron -- {NUM_EXC_INPUTS} exc + {NUM_INH_INPUTS} inh Segev-style inputs',
                   fontsize=12)
 
@@ -140,8 +140,8 @@ def plot_results(t_ms, v, spike_times, ex_bin_1ms, inh_bin_1ms, ex_count, inh_co
     inh_mean = inh_bin_1ms.mean(axis=0).astype(float)
     ax.plot(gaussian_filter1d(exc_mean - inh_mean, 50) * 1000, '#9E9E9E', lw=1,
             label='Exc mean rate - Inh mean rate (Hz)')
-    ax.axhline(y=0, linestyle=':')
     ax.set_ylabel('Rate (Hz)')
+    ax.axhline(y=0, linestyle=':')
     ax.legend(fontsize=8)
     ax.set_xlim(0, SIM_DURATION_MS)
     ax.set_title('Mean Instantaneous Input Rate', fontsize=10)

@@ -37,8 +37,8 @@ SYNAPSE_PARAMS = {
     "GABA_A": DEFAULT_SYNAPSE_KINETICS["GABA_A"],
 }
 
-AMPA_WEIGHT_US  = 0.040
-GABAA_WEIGHT_US = 0.003
+AMPA_WEIGHT_US  = 0.019
+GABAA_WEIGHT_US = 0.005
 
 # ── Segev-style rate parameters ──────────────────────────────────────────────
 
