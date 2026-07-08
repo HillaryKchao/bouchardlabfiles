@@ -21,7 +21,7 @@ from neuron import h
 
 SIM_DURATION_MS = 10000
 DT_MS           = 0.025
-CELSIUS         = 34.0
+CELSIUS         = 6.3
 V_INIT          = -65.0
 
 
@@ -37,8 +37,8 @@ SYNAPSE_PARAMS = {
     "GABA_A": DEFAULT_SYNAPSE_KINETICS["GABA_A"],
 }
 
-AMPA_WEIGHT_US  = 0.019
-GABAA_WEIGHT_US = 0.005
+AMPA_WEIGHT_US  = 0.0003
+GABAA_WEIGHT_US = 0.010
 
 # ── Segev-style rate parameters ──────────────────────────────────────────────
 

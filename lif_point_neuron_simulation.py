@@ -177,9 +177,17 @@ def main(random_seed=7):
     n_aps = len(spike_times)
     out_hz = 1000.0 * n_aps / SIM_DURATION_MS
     print(f"    Done. Somatic APs: {n_aps} (output rate: {out_hz:.2f} Hz)")
+    
+    v_for_plot = v.copy()
+    spike_width_steps = int(1.0 / DT_MS)
+    for spk_t in spike_times:
+        i0 = int(spk_t / DT_MS)
+        for k in range(spike_width_steps):
+            if i0 + k < len(v_for_plot):
+                v_for_plot[i0 + k] = 40.0 if k < spike_width_steps // 2 else V_RESET_MV
 
     print("\n[3] Plotting ...")
-    plot_results(t_ms, v, spike_times, ex_bin_1ms, inh_bin_1ms, ex_count, inh_count)
+    plot_results(t_ms, v_for_plot, spike_times, ex_bin_1ms, inh_bin_1ms, ex_count, inh_count)
 
     np.savez_compressed(
         'lif_point_neuron_data.npz', t_ms=t_ms, v_mv=v, spike_times_ms=spike_times,
